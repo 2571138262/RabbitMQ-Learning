@@ -147,9 +147,7 @@
 * rabbitmqctl rename_cluster_node oldnode1 newnode1 [oldnode2] [newnode2 ...]：修改节点名称
 
 #### （3）、控制台
-* Overview 总览 
-
-
+#####  Overview 总览 
     Queued messages : 如果有消息消费（创建队列）这里就会有一个折线图
     Global counts :
         Connections : 有多少连接
@@ -170,14 +168,11 @@
         就比如 导出已经配置好的交换机、队列、绑定，然后在导入到新的环境中   
         
         
-* Connections 连接
-* Channels 网络通信的信道
-
-    
+##### Connections 连接
+##### Channels 网络通信的信道
     所有的应用服务和RabbitMQ进行连接都需要建立Channel来进行实际的操作
-* Exchange 交换机
+##### Exchange 交换机
 ![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Exchange.png)
-
 
     生产者把消息默认投递到的位置
     默认提供的交换机都是以amq.开头的
