@@ -10,7 +10,7 @@
     数据存储：
     
 * 集群架构：Master-Slave模式、NetWork模式
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/ActiveMQjiqunjiagou.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/ActiveMQjiqunjiagou.jpg)
 
 ### 2、KAFKA
 #### Kafka是Linkedln开源的分布式发布-订阅消息系统，目前属于Apache顶级项目，Kafka主要特点是基于Pull的模式来处理消息消费，追求高吞吐量，一开始的目的就是用于日志收集和传输。0.8版本开始支持复制，不支持事务，对消息的重复、丢失、错误没有严格要求，适合产生大量数据的互联网服务的数据收集业务。
@@ -18,7 +18,7 @@
     一开始设计是针对大数据的
     
 * 集群架构：
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/Kafkajiqunjiagou.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Kafkajiqunjiagou.jpg)
 
 ### 3、RocketMQ
 #### RocketMQ是阿里开源的消息中间件，目前也是已经孵化为Apache顶级项目，它是纯Java开发，具有高吞吐量、高可用性、适合大规模分布式系统应用的特点。RocketMQ思路起源于Kafka，它对消息的可靠传输及事务性做了优化，目前在阿里集团被管饭应用于交易、充值、流计算、消息推送、日志流式处理、binglog分发等场景
@@ -26,13 +26,13 @@
     特点：可以保障消息的顺序性（顺序消费）、有丰富的消息拉取和处理的模式、也可以进行高效的订阅者，进行水平扩展实时消息队列机制、能承载上亿级别的消息堆积能力
     
 * 集群架构：Master-Slave模式...
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/RocketMQjiqunjiagou.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/images-folder/RocketMQjiqunjiagou.jpg)
 
 ### 4、RabbitMQ
 #### RabbitMQ是使用Erlang语言开发的开源消息队列系统，基于AMQP协议来实现。AMQP的主要特征是面向消息、队列、路由（包括点对点和发布/订阅）、可靠性、安全。AMQP协议更多用在企业系统内，对数据一致性、稳定性和可靠性要求很高的场景，对性能和吞吐量的要求还在其次。
 
 * 集群架构：
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/RabbitMQjiqunjiagou.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQjiqunjiagou.jpg)
 
 
 ## 二、RabbitMQ核心概念及AMQP协议
@@ -56,7 +56,7 @@
 * AMQP翻译：高级消息队列协议
 * AMQP定义：是具有现代特征的二进制协议。是一个提供统一消息服务的应用层标准高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计
 #### AMQP协议模型
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/AMQPxieyimoxing.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/AMQPxieyimoxing.jpg)
 
 ### 4、AMQP核心概念是什么？
 #### （1）、Server：又称Broker（MQ服务器一般都叫Broker），接受客户端的连接，实现AMQP实例服务
@@ -70,9 +70,9 @@
 #### （9）、Queue：也称为Message Queue，消息队列，保存消息并将它们转发给消费者
 
 ### 5、RabbitMQ整体架构模型是什么样子的？
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/RabbitMQdezhengtijiagou.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQdezhengtijiagou.jpg)
 ### 6、RabbitMQ消息是如何流转的的？
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/RabbitMQxiaoxiliuzhuan.jpg)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQxiaoxiliuzhuan.jpg)
 ### 7、RabbitMQ安装与使用
     官网地址：http://www.rabbitmq.com
     提前准备：安装Linux必要安装包
@@ -147,7 +147,7 @@
 * rabbitmqctl rename_cluster_node oldnode1 newnode1 [oldnode2] [newnode2 ...]：修改节点名称
 
 #### （3）、控制台
-* Overview 总览
+* Overview 总览 
 
 
     Queued messages : 如果有消息消费（创建队列）这里就会有一个折线图
@@ -176,7 +176,7 @@
     
     所有的应用服务和RabbitMQ进行连接都需要建立Channel来进行实际的操作
 * Exchange 交换机
-![Image](https://github.com/2571138262/RabbitMQ-Learning/tree/master/images-folder/Exchange.png)
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Exchange.png)
 
 
     生产者把消息默认投递到的位置
@@ -191,6 +191,9 @@
 
 
 ### 9、RabbitMQ消息生产与消费
+* ConnectionFactory : 获取链接工厂
+* 
+
 
 ### 10、RabbitMQ交换机详解
 
