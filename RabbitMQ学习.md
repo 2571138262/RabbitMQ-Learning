@@ -187,12 +187,150 @@
 
 ### 9、RabbitMQ消息生产与消费
 * ConnectionFactory : 获取链接工厂
-* 
-
+* Connection : 一个连接
+* Channel : 数据通信信道，可发送和接受消息
+* Queue : 具体的消息存储队列
+* Producer & Consumer 生产和消费者
 
 ### 10、RabbitMQ交换机详解
+* Exchange : 接收消息，并根据路由键转发消息锁绑定的队列
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Exchangejiaohuanji.jpg)
+#### （1）、交换机属性
+* Name : 交换机名称
+* Type : 交换机类型 direct、topic、fanout、headers
+* Durability : 是否需要持久化，true为持久化
+* Auto Delete : 当最后一个绑定到Exchange上的队列删除后，自动删除该Exchange
+* Internal : 当前Exchange是否用于RabbitMQ内部使用，默认为False
+* Arguments : 扩展参数，用于扩展AMQP协议自制定化使用
+
+#### （2）、Direct Exchange （直连）
+* 所有发送到Direct Exchange 的消息被转发到RouteKey中指定的Queue
+
+**注意：Direct模式可以使用RabbitMQ自带的Exchange：default Exchange，
+所以不需要将Exchange进行任何绑定（binding）操作，消息传递时，
+RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/DirectExchange.jpg)
+
+#### （3）、Topic Exchange
+* 所有发送到Topic Exchange的消息被转发到所有关心RouteKey中指定Topic的Queue上
+* Exchange 将RouteKey 和某Topic 进行模糊匹配，此时队列需要绑定一个Topic
+
+**注意：可以使用通配符进行模糊匹配**
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/TopicExchange.jpg)
+
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/TopicExchange1.jpg)
+
+#### （4）、Fanout Exchange
+* 不处理路由键，只需要简单的将队列绑定到交换机上
+* 发送到交换机的消息都会被转发到与该交换机绑定的所有队列上
+* Fanout交换机转发消息是最快的
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/FanoutExchange.jpg)
 
 ### 11、RabbitMQ队列、绑定、虚拟主机、消息
+
+#### （1）、Binding - 绑定
+* Exchange和Exchange、Queue之间的连接关系
+* Binding中可以包含RoutingKey或者参数
+
+#### （2）、Queue - 消息队列
+* 消息队列，实际存储消息数据
+* Durability：是否持久， Durable：是， Transient：否
+* Auto delete：如选yes，代表当最后一个监听被移除之后，该Queue会自动被删除
+
+#### （3）、Message - 消息
+* 服务器和应用程序之间传送的数据
+* 本质上就是一段数据，由Properties和Payload（Body）组成
+* 常用属性：delivery mode、headers（自定义属性）
+* content-type、content_encoding、priority
+* correlation_id、reply_to、expiration、message_id
+* timestamp、type、user_id、app_id、cluster_id
+
+#### （4）、 Virtual host - 虚拟主机
+* 虚拟地址，用于进行逻辑隔离，最上层的消息路由
+* 一个Virtual Host里面可以有若干个Exchange和Queue
+* 同一个Virtual Host里面不能有相同名称的Exchange或Queue
+
+
+
+## 三、RabbitMQ高级特性
+
+### 1、消息如何保障 100% 的投递成功？
+#### （1）、什么是生产端的可靠性投递？
+* 保障消息的成功发出
+* 保障MQ节点的成功接收
+* 发送端收到MQ节点（Broker）确认应答
+* 完善的消息进行补偿机制
+
+#### （2）、生产端 - 可靠性投递（一）
+##### BAT/TMD 互联网大厂的解决方案
+* 消息落库，对消息状态进行打标  --  发送了消息之后，要把消息存到库中，然后轮询接收消息的应答，然后对库中消息的状态进行更改
+
+* 消息的延迟投递，做二次确认，回调检查
+
+#### （3）、生产端 - 可靠性投递（二）
+##### 消息信息落库，对消息状态进行打标
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/kekaoxingtoudi1.jpg)
+* Step1：首先将自己的业务入库，然后生产一条订单消息封装，然后将这条消息也入库，做一个后续的入库（这里有俩次写盘操作）
+* Step2：把消息发送出去
+* Step3：应答结果给生产端，生产端会异步的监听（Confirm Listener）MQ Broker 返回的应答结果
+* Step4：然后我们再从数据库中把指定的消息记录抓取出来，然后更新这条消息的状态（这里假设状态：0为投递成功）
+* Step5：通过定时任务来抓取这条状态为0的消息数据，每隔多少时间去查询一次 （这里就会用到分布式定时任务）
+* Step6：如果超过了最大限制时间还没有抓取到这条消息，那么就重试，重新生成消息封装，重头来
+* Step7：但是如果多次重来还是不成功，这里需要限制重试的次数，这里可以通过人工补偿查询失败的原因
+
+#### （4）、生产端 - 可靠性投递（三）
+##### 保障MQ我们思考如果第一种可靠性投递，在高并发的场景下是否适合？
+##### 消息的延迟投递，做二次确认，回调检查 （这么做少做了一次DB存储，这个目的是保证性能）
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/kekaoxingtoudi2.jpg)
+* Step1：先把业务消息进行数据库落库，然后在去发送消息到MQ服务（这里一定是先持久化业务消息，再去发送MQ消息）
+* Step2：在发送第一条消息之后（这条消息投递到真正处理业务所对应的队列中），然后再发第二条消息（这条消息投递到Callback服务所对应的业务，也就是延迟投递的消息），假设5分钟之后发送第二条
+* Step3：Broker端收到消息，然后监听Consumer处理消息，等待应答结果
+* Step4：Consumer处理完成之后会发送一个confirm的响应（注意：这里也是一个新的消息，这里的消息的内容就是表明业务消息成功被消费，并不是正常的那个ACK），发送给MQ
+* Step5：消费端把消息处理成功之后会生成一条新的消息（Send confirm）发送到MQServer，
+然后由Callback服务去监听下游服务（真正 处理业务消息的那个服务）是否成功处理了业务消息，然后Callback就对这条消息进行入库处理
+* Step6：延迟投递的消息（第二条消息）投递的队列是由Callback服务监听处理的，Callback服务通过获取到的第二条消息，
+然后和自己数据库中的数据进行Check（这里就是延迟check）
+* Step7：如果Callback此时Check结果无效，那么Callback会主动发起一个RPC通信（携带业务消息ID）给业务消息发起方，要求业务消息发起方从新发送一次业务消息
+
+### 2、幂等性概念详情
+#### 幂等性是什么？
+* 我们可以借鉴数据库的乐观锁机制
+* 比如我们执行一条更新库存的SQL语句
+* UPDATE T_REPS SET COUNT = COUNT - 1, VERSION = VERSION + 1 WHERE VERSION = 1
+
+### 3、在海量订单产生的业务高峰期，如何避免消息的重复消费问题？
+#### 消费端 - 幂等性保障
+##### 在海量订单产生的业务高峰期，如何避免消息的重复消费问题？
+* 消费端实现幂等性，就意味着，我们的消息永远不会消费多次，即使我们收到了多条一样的消息
+
+##### 业界主流的幂等性操作：
+* 唯一ID + 指纹码 机制，利用数据库主键去重
+* 利用Redis的原子性去实现
+
+##### 唯一ID + 指纹码 机制
+* 唯一ID + 指纹码 机制， 利用数据库主键去重
+* SELECT COUNT(1) FROM T_ORDER WHERE ID = 唯一ID + 指纹码
+* 好处：实现简单
+* 坏处：高并发下有数据库写入的性能瓶颈
+* 解决方案：根进ID进行分库分表进行算法路由
+
+##### 利用Redis原子特性实现
+* 使用Redis进行幂等，需要考虑的问题
+* 第一：我们是否要进行数据落库，如果落库的话，关键解决的问题是数据库和缓存如何做到原子性？
+* 第二：如果不进行落库，那么都存储到缓存中，如何设置定时同步的策略？
+
+
+### 4、Confirm确认消息、Return返回消息   ----   投递消息的机制
+
+### 5、自定义消费者
+
+### 6、消息的ACK与重回队列
+
+### 7、消息的限流
+
+### 8、TTL消息
+
+### 9、死信队列
 
 
 
