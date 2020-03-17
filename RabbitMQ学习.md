@@ -109,7 +109,7 @@
 #### （2）、服务的启动：rabbitmq-server start &
     & 表示后台启动
     vim /etc/hostname 修改主机名
-    lsof -i:5672    
+    lsof -i:5672    // 通过端口号查看服务是否启动
         如果可以看到beam.smp 9599 rabbitmq   52u  IPv6 223762147      0t0  TCP *:amqp (LISTEN)，就证明RabbitMQ可以了
     
 #### （3）、服务的停止：rabbitmqctl app_stop
@@ -320,17 +320,93 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 * 第二：如果不进行落库，那么都存储到缓存中，如何设置定时同步的策略？
 
 
-### 4、Confirm确认消息、Return返回消息   ----   投递消息的机制
+### 4、Confirm确认消息、Return返回消息   ----   投递消息的机制（都是针对生产端的）
+#### （1）、Confirm确认消息
+##### 理解Confirm消息确认机制：
+* 消息的确认是值生产者投递消息后，如果Broker收到消息，则会给我们生产者一个应答。
+* 生产者进行接收应答，用来确认这条消息是否正常的发送到Broker，这种方式也是消息的可靠性投递的核心保障！
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Confirmquerenxiaoxiliuchengjiexi.jpg)
+
+##### 如何实现Confirm确认消息？
+* 第一步：在Channel上开启确认模式：channel.confirmSelect()
+* 第二部：在Channel上添加监听：addConfirmListener，监听成功和失败的返回结果，根据具体的结果对消息进行重新发送、或记录日志等后续处理！
+
+
+#### （2）、Return消息机制
+* Return Listener 用于处理一些不可路由的消息！
+* 我们的消息生产，通过制定一个Exchange 和 RoutingKey，把消息送达到某一个队列中去，然后我们的消费者监听队列，进行消费处理操作！
+* 但是在某些情况下，如果我们在发送消息的时候，当前的Exchange不存在或者指定的路由Key路由不到，这个时候如果我们需要监听这种不可达的消息，就要是用Return Listener
+##### Return消息机制
+* 在基础API中有一个关键的配置项：
+* Mandatory：如果为true，则监听器会接收到路由不可达的消息，然后进行后续处理，如果为false，那么broker端自动删除该消息
+
+##### Return消息机制流程
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Returnxiaoxijizhiliucheng.jpg)
+
 
 ### 5、自定义消费者
+#### （1）、消费端自定义监听
+* 我们一般就是在代码中编写While循环，进行consumer.nextDelivery方法进行获取下一条消息，然后进行消费处理！
+* 但是我们使用自定义的Consumer更加的方便，解耦性更加的强，也是在实际工作中最常用的使用方式！
+
+### 6、消息的限流 
+#### （1）、什么是消费端的限流？
+* 假设一个场景，首先，我们RabbitMQ服务器有上万条未处理的消息，我们随便打开一个消费者客户端，会出现下面情况
+* 巨量的消息瞬间全部推送过来，但是我们单个客户端无法同时处理这么多数据！
+* RabbitMQ提供了一种qos（服务质量保证）功能，即在非自动确认消息的前提下，如果一定数目的消息（通过基于consumer或者channel设置Qos的值）未被确认前，不进行消费新的消息
+* void basicQos(int prefetchSize, int prefetchCount, boolean global) throws IOException; （在消费端处理）
+* prefetchSize：0   消息的大小限制，为0就是不限制
+* prefetchCount：会告诉RabbitMQ不要同时给一个消费者推送多于N个消息，即一旦有N个消息还没有ack，则该consumer将block掉，直到有消息ack
+* global：true\false 是否将上面设置应用于Channel简单点说，就是上面限制是channel级别的还是consumer级别的
+* prefetchSize 和 global 这两项，rabbitmq没有实现， 暂且不研究prefetch_count在no_ask=false的情况下生效，
+
+
+    channel.basicConsume(queueName, true, consumer);
+    String basicConsume(String queue, boolean autoAck, Consumer callback) throws IOException;
+    在RabbitMQ中签收的方式有俩种：自动签收，手动签收
+    autoAck： 在真正的工作中，如果需要限流，那么就不能做自动的签收
 
 ### 6、消息的ACK与重回队列
+#### 消费端的手工ACK和NACK
+* 消息端进行消费的时候，如果由于业务异常我们可以进行日志的记录，然后进行补偿！
+* 如果由于服务器宕机等严重问题，那么我们就需要手工进行ACK保障消费端消费成功
 
-### 7、消息的限流
+#### 消费端的重回队列
+* 消费端重回队列是为了对没有处理成功的消息，把消息重新会递给Broker
+* 一般我们在实际应用中，都会关闭重回队列，也就是设置为False
 
 ### 8、TTL消息
+#### TTL
+* TTL是Time To Live 的缩写，也就是生存时间
+* RabbitMQ支持消息的过期时间，在消息发送时可以进行制指定
+* RabbitMQ支持队列的过期时间，从消息入队列开始计算，只要超过了队列的超时时间配置，那么消息会自动的清除
 
 ### 9、死信队列
+#### 死信队列： DLX， Dead-Letter-Exchange
+* 利用DLX，当消息在一个队列中变成死信（dead message， 没有任何消费者来消费它）之后，它能被重新publish到另一个Exchange，这个Exchange就是DLX
 
+#### 消息变成死信有以下几种情况
+* 消息被拒绝(basic.reject/basic.nack)并且request = false
+* 消息TTL过期
+* 队列达到最大的长度
+
+#### 死信队列
+* DLX也是一个正常的Exchange， 和一般的Exchange没有区别，它能在任何队列上被指定，实际上就是设置某个队列的属性
+* 当这个队列中有死信时，RabbitMQ就会自动的将这个消息重新发布到设置的Exchange上去，进而被路由到另一个队列。
+* 可以监听这个队列中消息做响应的处理，这个热性可以弥补rabbitMQ3.0以前支持的immediate参数的功能
+
+#### 死信队列设置
+* 首先需要设置死信队列的exchange和queue，然后进行绑定
+
+
+    例如
+    Exchange: dlx.exchange
+    Queue: del.queue
+    RoutingKey: #
+    
+* 然后我们进行正常声明交换机、队列、绑定，只不过我们需要在队列加上一个参数即可：arguments.put("x-dead-letter-exchange", "dlx.exchange");
+
+* 这样消息在过期、requeue、队列在达到最大长度时，消息就可以直接路由到死信队列
+    
 
 

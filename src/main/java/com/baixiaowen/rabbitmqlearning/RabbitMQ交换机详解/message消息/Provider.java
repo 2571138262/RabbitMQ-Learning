@@ -36,7 +36,7 @@ public class Provider {
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
                 .deliveryMode(2)     //常用的模式，2为持久化的投递， 1为不是持久化投递（服务重启就没了） 
                 .contentEncoding("UTF-8")   // 字符集
-                .expiration("10000")        // 设置过期时间
+                .expiration("10000")        // 设置过期时间， 对应的是消息的，如果在管控台中设置Queue的有效时间，那个时间是对整个queue的
                 .headers(handers)           // 添加自定义属性        
                 .build();
         
