@@ -323,7 +323,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 ### 4、Confirm确认消息、Return返回消息   ----   投递消息的机制（都是针对生产端的）
 #### （1）、Confirm确认消息
 ##### 理解Confirm消息确认机制：
-* 消息的确认是值生产者投递消息后，如果Broker收到消息，则会给我们生产者一个应答。
+* 消息的确认是指生产者投递消息后，如果Broker收到消息，则会给我们生产者一个应答。
 * 生产者进行接收应答，用来确认这条消息是否正常的发送到Broker，这种方式也是消息的可靠性投递的核心保障！
 ![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Confirmquerenxiaoxiliuchengjiexi.jpg)
 
@@ -408,5 +408,131 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 
 * 这样消息在过期、requeue、队列在达到最大长度时，消息就可以直接路由到死信队列
     
+    
+
+## 四、RabbitMQ高级整合应用
+
+### 1、RabbitMQ整合Spring AMQP实战
+
+#### （1）、RabbitAdmin
+* RabbitAdmin类可以很好的操作RabbitMQ，在Spring中直接进行注入即可
+* 注意：autoStartup必须要设置为true，否则Spring容器不会加载RabbitAdmin类
+* RabbitAdmin底层实现就是从Spring容器中获取Exchange，Binging、RoutingKey以及Queue的@Bean声明
+* 然后使用RabbitTemplate的execute方法执行对应的声明、修改、删除等一系列RabbitMQ基础功能操作
+* 例如：添加一个交换机、删除一个绑定、清空一个队列里的消息等等
+
+#### （2）、SpringAMQP 声明
+* 在Rabbit基础API里面声明一个Exchange、声明一个绑定、一个队列
+
+
+    channel.exchangeDeclare(exchangeName, "topic", true, false, null);
+    channel.queueDeclare(queueName, true, false, false, null);
+    channel.queueBind(queueName, exchangeName, routingKey);
+
+* 使用SpringAMQP去声明，就需要使用SpringAMQP的如下模式，即声明@Bean方式
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/SpringAMQPshengming.jpg)
+
+#### （3）、RabbitTemplate 消息模板
+* 我们在与SpringAMQP整合的时候进行发送消息的关键类
+* 该类提供了丰富的发送消息方法，包括可靠性投递消息方法、
+回调监听消息接口ConfirmCallBack、
+返回值确认接口ReturnCallBack等等。同样我们需要进行注入到Spring容器中，然后直接使用
+* 在与Spring整合时需要实例化，但是在与SpringBoot整合时，在配置文件里添加配置即可
+
+
+#### （4）、SimpleMessageListenerContainer 消息的消费者
+##### 简单消息监听容器
+* 这个类非常强大，我们可以对他进行很多设置，对于消费者的配置项，这个类都可以满足
+* 监听队列（多个队列），自动启动，自动声明功能
+* 设置事务特性、事务管理器、事务属性、事务容量（并发）、是否开启事务、回滚消息等
+* 设置消费者数量、最大最小数量、批量消费
+* 设置消息确认和自动确认模式、是否重回队列、异常捕获handler函数
+* 设置消费者标签生成策略、是否独占模式、消费者属性等
+* 设置具体的监听器、消息转换器等等
+* 注意：SimpleMessageListenerContainer可以进行动态设置，比如在运行中的应用可以动态的修改其消费者数量的大小、接收消息的模式等
+* 很多基于RabbitMQ的自制化后端管控台在进行动态设置的时候，也是根据这一特性去实现的，所以可以看出SpringAMQP非常的强大
+
+##### SimpleMessageListenerContainer为什么可以动态感知配置变更？
+
+#### （5）、MessageListenerAdapter
+##### MessageListenerAdapter 即消息监听适配器
+* 通过messageListenerAdapter的代码我们可以看出如下核心属性
+* defaultListenerMethod默认监听方法名称：用于设置监听方法名称
+* Delegate 委派对象：实际真实的委派对象，用于处理消息
+
+##### MessageListenerAdapter 即消息监听适配器，这个是自定义的
+
+* queueOrTagToMethodName 队列表示与方法名称组成的集合
+* 可以一一进行队列与方法名称的匹配
+* 队列和方法名称绑定，即指定队列里的消息会被绑定的方法所接受处理
+
+
+     // 适配器方式，默认是有子弟的方法名字的，handleMessage
+     // 可以自己制定一个方法的名字， consumerMessage
+     // 也可以添加一个转换器，从字节数组转换为String
+     MessageListenerAdapter adapter = new MessageListenerAdapter(new MessageDelegate());
+     // 自定义adapter处理方法
+     adapter.setDefaultListenerMethod("consumerMessage");
+     // 添加Message转换器（自定义）
+     adapter.setMessageConverter(new TextMessageConverter());
+     // 设置适配器
+     container.setMessageListener(adapter);
+
+#### （6）、MessageConverter   
+##### MessageConverter 消息转换器
+* 我们在进行发送消息的时候，正常情况下消息体为二进制的数据方式进行传输，如果希望内部帮我们进行转换，或者指定自定义的转换器，就需要用到MessageConverter
+* 自定义常用转换器： MessageConverter， 一般来讲都需要实现这个接口
+* 重写下面两个方法：
+    
+
+    toMessage：java对象转换为Message
+    fromMessage：Message对象转换为Java对象
+    
+* Json转换器：Jackson2JsonMessageConverter：可以进行java对象的转换功能
+* DefaultJackson2JavaTypeMapper映射器：可以进行java对象的映射关系
+* 自定义二进制转换器：比如图片类型、PDF、PPT、流媒体
+
+
+### 2、RabbitMQ整合Spring Boot 实战
+#### （1）、SpringBoot整合配置详解 生产者端核心配置
+* publisher-confirms，实现一个监听器用于监听Broker端给我们返回的确认请求：RabbitTemplate.ConfirmCallback
+* publisher-returns，保证消息对Broker端是可达的，如果出现路由键不可达的情况，则使用监听器对不可达的消息进行后续的处理，保证消息的路由成功：RabbitTemplate.ReturnCallback
+
+* 注意一点，在发送消息的时候对template进行配置mandatory=true保证监听有效
+* 生产端还可以配置其他属性，比如发送重试，超时时间、次数、间隔等
+
+
+        spring.rabbitmq.addresses=183.2.169.17:5672
+        spring.rabbitmq.username=guest
+        spring.rabbitmq.password=guest
+        spring.rabbitmq.virtual-host=/
+        spring.rabbitmq.connection-timeout=15000
+        
+        spring.rabbitmq.publisher-confirms=true
+        spring.rabbitmq.publisher-returns=true
+        spring.rabbitmq.template.mandatory=true
+
+
+#### （2）、消费端核心配置
+* 首先配置手工确认模式，用于ACK的手工处理，这样我们可以保证消息的可靠性送达，
+或者在消费端消费失败的时候可以做重回队列、根据业务记录日志等处理
+* 可以设置消费端的监听个数和最大个数，用于控制消费端的并发情况
+
+
+    spring.rabbitmq.listener.simple.acknowledge-mode=manual
+    spring.rabbitmq.listener.simple.concurrency=1
+    spring.rabbitmq.listener.simple.max-concurrency=5
+
+##### @RabbitListener注解使用
+* 消费端监听 @RabbitListener注解，这个对于在实际工作中非常好用
+* @RabbitListener 是一个组合注解，里面可以注解配置
+@queueBinding、@Queue，@Exchange直接通过这个组合注解一次性搞定消费端交换机、队列
+绑定、路由、并且配置监听功能等
+![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/SpringAMQPshengming.jpg)
+
+由于类配置写在代码里非常不友好，所以强烈建议大家使用配置文件配置。
+
+### 3、RabbitMQ整合Spring Cloud实战
+
 
 
