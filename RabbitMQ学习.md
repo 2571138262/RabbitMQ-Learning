@@ -10,7 +10,7 @@
     数据存储：
     
 * 集群架构：Master-Slave模式、NetWork模式
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/ActiveMQjiqunjiagou.jpg)
+![avator](images-folder/ActiveMQjiqunjiagou.jpg)
 
 ### 2、KAFKA
 #### Kafka是Linkedln开源的分布式发布-订阅消息系统，目前属于Apache顶级项目，Kafka主要特点是基于Pull的模式来处理消息消费，追求高吞吐量，一开始的目的就是用于日志收集和传输。0.8版本开始支持复制，不支持事务，对消息的重复、丢失、错误没有严格要求，适合产生大量数据的互联网服务的数据收集业务。
@@ -18,7 +18,7 @@
     一开始设计是针对大数据的
     
 * 集群架构：
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Kafkajiqunjiagou.jpg)
+![avator](images-folder/Kafkajiqunjiagou.jpg)
 
 ### 3、RocketMQ
 #### RocketMQ是阿里开源的消息中间件，目前也是已经孵化为Apache顶级项目，它是纯Java开发，具有高吞吐量、高可用性、适合大规模分布式系统应用的特点。RocketMQ思路起源于Kafka，它对消息的可靠传输及事务性做了优化，目前在阿里集团被管饭应用于交易、充值、流计算、消息推送、日志流式处理、binglog分发等场景
@@ -26,13 +26,13 @@
     特点：可以保障消息的顺序性（顺序消费）、有丰富的消息拉取和处理的模式、也可以进行高效的订阅者，进行水平扩展实时消息队列机制、能承载上亿级别的消息堆积能力
     
 * 集群架构：Master-Slave模式...
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/images-folder/RocketMQjiqunjiagou.jpg)
+![avator](images-folder/avators-folder/RocketMQjiqunjiagou.jpg)
 
 ### 4、RabbitMQ
 #### RabbitMQ是使用Erlang语言开发的开源消息队列系统，基于AMQP协议来实现。AMQP的主要特征是面向消息、队列、路由（包括点对点和发布/订阅）、可靠性、安全。AMQP协议更多用在企业系统内，对数据一致性、稳定性和可靠性要求很高的场景，对性能和吞吐量的要求还在其次。
 
 * 集群架构：
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQjiqunjiagou.jpg)
+![avator](images-folder/RabbitMQjiqunjiagou.jpg)
 
 
 ## 二、RabbitMQ核心概念及AMQP协议
@@ -56,7 +56,7 @@
 * AMQP翻译：高级消息队列协议
 * AMQP定义：是具有现代特征的二进制协议。是一个提供统一消息服务的应用层标准高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计
 #### AMQP协议模型
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/AMQPxieyimoxing.jpg)
+![avator](images-folder/AMQPxieyimoxing.jpg)
 
 ### 4、AMQP核心概念是什么？
 #### （1）、Server：又称Broker（MQ服务器一般都叫Broker），接受客户端的连接，实现AMQP实例服务
@@ -70,9 +70,9 @@
 #### （9）、Queue：也称为Message Queue，消息队列，保存消息并将它们转发给消费者
 
 ### 5、RabbitMQ整体架构模型是什么样子的？
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQdezhengtijiagou.jpg)
+![avator](images-folder/RabbitMQdezhengtijiagou.jpg)
 ### 6、RabbitMQ消息是如何流转的的？
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/RabbitMQxiaoxiliuzhuan.jpg)
+![avator](images-folder/RabbitMQxiaoxiliuzhuan.jpg)
 ### 7、RabbitMQ安装与使用
     官网地址：http://www.rabbitmq.com
     提前准备：安装Linux必要安装包
@@ -172,7 +172,7 @@
 ##### Channels 网络通信的信道
     所有的应用服务和RabbitMQ进行连接都需要建立Channel来进行实际的操作
 ##### Exchange 交换机
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Exchange.png)
+![avator](images-folder/Exchange.png)
 
     生产者把消息默认投递到的位置
     默认提供的交换机都是以amq.开头的
@@ -194,7 +194,7 @@
 
 ### 10、RabbitMQ交换机详解
 * Exchange : 接收消息，并根据路由键转发消息锁绑定的队列
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Exchangejiaohuanji.jpg)
+![avator](images-folder/Exchangejiaohuanji.jpg)
 #### （1）、交换机属性
 * Name : 交换机名称
 * Type : 交换机类型 direct、topic、fanout、headers
@@ -209,22 +209,22 @@
 **注意：Direct模式可以使用RabbitMQ自带的Exchange：default Exchange，
 所以不需要将Exchange进行任何绑定（binding）操作，消息传递时，
 RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/DirectExchange.jpg)
+![avator](images-folder/DirectExchange.jpg)
 
 #### （3）、Topic Exchange
 * 所有发送到Topic Exchange的消息被转发到所有关心RouteKey中指定Topic的Queue上
 * Exchange 将RouteKey 和某Topic 进行模糊匹配，此时队列需要绑定一个Topic
 
 **注意：可以使用通配符进行模糊匹配**
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/TopicExchange.jpg)
+![avator](images-folder/TopicExchange.jpg)
 
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/TopicExchange1.jpg)
+![avator](images-folder/TopicExchange1.jpg)
 
 #### （4）、Fanout Exchange
 * 不处理路由键，只需要简单的将队列绑定到交换机上
 * 发送到交换机的消息都会被转发到与该交换机绑定的所有队列上
 * Fanout交换机转发消息是最快的
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/FanoutExchange.jpg)
+![avator](images-folder/FanoutExchange.jpg)
 
 ### 11、RabbitMQ队列、绑定、虚拟主机、消息
 
@@ -269,7 +269,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 
 #### （3）、生产端 - 可靠性投递（二）
 ##### 消息信息落库，对消息状态进行打标
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/kekaoxingtoudi1.jpg)
+![avator](images-folder/kekaoxingtoudi1.jpg)
 * Step1：首先将自己的业务入库，然后生产一条订单消息封装，然后将这条消息也入库，做一个后续的入库（这里有俩次写盘操作）
 * Step2：把消息发送出去
 * Step3：应答结果给生产端，生产端会异步的监听（Confirm Listener）MQ Broker 返回的应答结果
@@ -281,7 +281,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 #### （4）、生产端 - 可靠性投递（三）
 ##### 保障MQ我们思考如果第一种可靠性投递，在高并发的场景下是否适合？
 ##### 消息的延迟投递，做二次确认，回调检查 （这么做少做了一次DB存储，这个目的是保证性能）
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/kekaoxingtoudi2.jpg)
+![avator](images-folder/kekaoxingtoudi2.jpg)
 * Step1：先把业务消息进行数据库落库，然后在去发送消息到MQ服务（这里一定是先持久化业务消息，再去发送MQ消息）
 * Step2：在发送第一条消息之后（这条消息投递到真正处理业务所对应的队列中），然后再发第二条消息（这条消息投递到Callback服务所对应的业务，也就是延迟投递的消息），假设5分钟之后发送第二条
 * Step3：Broker端收到消息，然后监听Consumer处理消息，等待应答结果
@@ -325,7 +325,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 ##### 理解Confirm消息确认机制：
 * 消息的确认是指生产者投递消息后，如果Broker收到消息，则会给我们生产者一个应答。
 * 生产者进行接收应答，用来确认这条消息是否正常的发送到Broker，这种方式也是消息的可靠性投递的核心保障！
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Confirmquerenxiaoxiliuchengjiexi.jpg)
+![avator](images-folder/Confirmquerenxiaoxiliuchengjiexi.jpg)
 
 ##### 如何实现Confirm确认消息？
 * 第一步：在Channel上开启确认模式：channel.confirmSelect()
@@ -341,7 +341,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 * Mandatory：如果为true，则监听器会接收到路由不可达的消息，然后进行后续处理，如果为false，那么broker端自动删除该消息
 
 ##### Return消息机制流程
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/Returnxiaoxijizhiliucheng.jpg)
+![avator](images-folder/Returnxiaoxijizhiliucheng.jpg)
 
 
 ### 5、自定义消费者
@@ -430,7 +430,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
     channel.queueBind(queueName, exchangeName, routingKey);
 
 * 使用SpringAMQP去声明，就需要使用SpringAMQP的如下模式，即声明@Bean方式
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/SpringAMQPshengming.jpg)
+![avator](images-folder/SpringAMQPshengming.jpg)
 
 #### （3）、RabbitTemplate 消息模板
 * 我们在与SpringAMQP整合的时候进行发送消息的关键类
@@ -528,7 +528,7 @@ RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃**
 * @RabbitListener 是一个组合注解，里面可以注解配置
 @queueBinding、@Queue，@Exchange直接通过这个组合注解一次性搞定消费端交换机、队列
 绑定、路由、并且配置监听功能等
-![Image](https://github.com/2571138262/RabbitMQ-Learning/blob/master/images-folder/SpringAMQPshengming.jpg)
+![avator](images-folder/SpringAMQPshengming.jpg)
 
 由于类配置写在代码里非常不友好，所以强烈建议大家使用配置文件配置。
 
